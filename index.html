@@ -13,7 +13,7 @@
 		<p class="selected-item">Selected Item: {{selectedItem | json}}</p>
 
 		<items-grid class="items-grid">
-				<ul>
+				<ul ng-click="reportItem($event)">
 						<li class="outer-item" ng-repeat="item in items track by item.id">
 								<div class="inner-item"  data-index="{{$index}}">{{ item.name }}</div>
 						</li>

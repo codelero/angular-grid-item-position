@@ -2,54 +2,14 @@
   'use strict';
 
   angular.module('app', [])
-    .directive('itemsGrid', function ($window) {
+    .directive('itemsGrid', function () {
       return {
         restrict: 'E',
-        bindToController: true, // no need for scope, used for demonstration only
-        controller: ItemsGridController, // no controller needed just wanted some data
-        link: link
+        controller: ItemsGridController // no controller needed just wanted some data
       };
 
-      function link(scope, el) {
+      function ItemsGridController($scope, $window) {
 
-        // possible (and probably better) to refactor into ng-click and use controller instead.
-        // however recommend using a switch statement instead of getComputedStyle
-        el.on('click', handleClick);
-
-        function handleClick(event) {
-
-          var index = angular.element(event.target).data('index');
-          var item = scope.items[index]; // reference to items collection
-
-          if (index || index === 0) {
-
-            // getComputedStyle IE11 and above (based on media queries)
-            // use switch statement and $window object for IE10 and below
-            var columnWidth = +$window.getComputedStyle(el[0], '::before')
-              .getPropertyValue('content')
-              .replace(/"/g, '')
-              .split('-')[1];
-
-            var column = index % columnWidth + 1;
-            var row = Math.floor(index / columnWidth) + 1;
-            var buildItem = {
-              id: item.id,
-              name: item.name,
-              column: column,
-              row: row
-            };
-
-            // just for display purposes
-            scope.$apply(function () {
-              scope.selectedItem = buildItem
-            });
-
-            console.log(buildItem);
-          }
-        }
-      }
-
-      function ItemsGridController($scope) {
         $scope.items = [
           {
             id: 1,
@@ -84,6 +44,50 @@
             name: 'Plum'
           }
         ];
+
+        $scope.reportItem = reportItem;
+
+        // better off in a factory
+        function reportItem(event) {
+          var index = angular.element(event.target).data('index');
+
+          if (index || index === 0) {
+            var columnWidth = _getColumnWidth(),
+              item = $scope.items[index],
+              column = index % columnWidth + 1,
+              row = Math.floor(index / columnWidth) + 1;
+
+            var buildItem = {
+              id: item.id,
+              name: item.name,
+              column: column,
+              row: row
+            };
+
+            $scope.selectedItem = buildItem;
+
+            console.log(buildItem);
+          }
+        }
+
+        function _getColumnWidth() {
+          var windowWidth = $window.innerWidth;
+
+          switch (true) {
+            case (windowWidth > 1200):
+              return 6;
+            case (windowWidth > 1000):
+              return 5;
+            case (windowWidth > 800):
+              return 4;
+              break;
+            case (windowWidth > 500):
+              return 3;
+            default :
+              return 1;
+          }
+
+        }
       }
     })
 })
